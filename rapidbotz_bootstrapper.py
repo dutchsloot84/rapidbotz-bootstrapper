@@ -102,3 +102,18 @@ else:
     else:
         print("Unable to verify update status — proceeding with pull just in case.")
         pull_latest_changes()
+        
+ # === LAUNCH THE AGENT ===
+print("Launching Rapidbotz agent...")
+
+agent_jar = Path(LOCAL_REPO_DIR) / "agent" / "botzautomation-agent-mobilitas-all-1.0.1.jar"
+
+if agent_jar.exists():
+    try:
+        subprocess.Popen(["java", "-jar", str(agent_jar)], shell=True)
+        print("Agent JAR launched successfully.")
+    except Exception as e:
+        print("Failed to launch agent JAR:", e)
+else:
+    print(f"ERROR: agent.jar not found at expected location: {agent_jar}")
+
