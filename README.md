@@ -60,7 +60,7 @@ How to Generate a PAT:
 6. Select "Enable SSO" dropdown
   - Select aaa-ncnu-ie and authorize
 
-Set Your Environment Variables (Windows)
+#### Option A: Set Your Environment Variables (Windows)
 
 Open Command Prompt and run:
 ```cmd
@@ -68,6 +68,26 @@ setx GITHUB_PAT your_token_here
 setx GITHUB_EMAIL your_email@example.com
 ```
 💡 You may need admin rights for this depending on system policy.
+
+#### Option B: Define Variables Inside the .bat File
+
+If you'd rather not set system-wide environment variables, you can define them directly inside run_bootstrapper.bat.
+
+Open the batch file and uncomment the lines below:
+
+```
+:: set GITHUB_PAT=your_token_here
+:: set GITHUB_EMAIL=your_email@example.com
+```
+
+Just remove the :: at the beginning of each line and add your actual token and email.
+
+This approach is useful if:
+
+- You want to avoid permanent changes
+
+- You're sharing this with users who will run it from a flash drive or temporary folder
+
 ---
 ### 3. 🔑 Set Up SSH Key (for GitHub Access)
 You need an SSH key so the script can securely pull from GitHub.
@@ -104,7 +124,8 @@ ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIM... your_email@example.com
 - Title: something like Rapidbotz Agent
 - Key: paste the entire contents of id_ed25519.pub
 4. Click Add SSH Key
-5. Click Enable SSO if prompted
+5. Select "Enable SSO" dropdown
+  - Select aaa-ncnu-ie and authorize
 
 ✅ Now your machine is authorized to pull from your GitHub org via SSH.
 
