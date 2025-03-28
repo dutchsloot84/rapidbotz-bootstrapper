@@ -17,11 +17,13 @@ Designed to help non-technical users run the Rapidbotz agent with a simple doubl
 ---
 
 ## 📁 Folder Structure
-/rapidbotz-bootstrapper 
-- config.json # Local settings (branch and repo path) 
-- rapidbotz_bootstrapper.py # Python script that manages pull + launch 
-- run_bootstrapper.bat # Easy-to-use batch file for non-technical users
 
+```md
+/rapidbotz-bootstrapper
+├── config.json                 # Settings for branch and repo path
+├── rapidbotz_bootstrapper.py  # Main Python script (clone + launch)
+├── run_bootstrapper.bat       # Windows batch file for launching the script
+```
 
 ---
 
