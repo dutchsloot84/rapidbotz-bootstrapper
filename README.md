@@ -1,3 +1,4 @@
+---
 # Rapidbotz Bootstrapper
 
 A lightweight Python-based tool that pulls the latest version of the `mobilitas-rapidbotz-local-agent` repository and launches the Rapidbotz agent automatically.
@@ -197,3 +198,5 @@ This will:
 - The script uses SSH for Git operations and HTTPS (with token) for update detection via GitHub API.
 - Your SSH key and PAT must be authorized for your organization.
 - Make sure Java is installed and available in your system PATH.
+
+---
