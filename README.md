@@ -37,6 +37,41 @@ curl -o python-installer.exe https://www.python.org/ftp/python/3.12.2/python-3.1
 python-installer.exe /quiet InstallAllUsers=1 PrependPath=1 Include_test=0
 ```
 
+#### 🔐 Prerequisite: Rapidbotz Access
+
+Before you can use the Rapidbotz Bootstrapper, you must have access to the Rapidbotz platform.
+1. Log in to:
+https://botzautomation.rapidbotz.com/login
+
+2. If you don’t have access, contact your team lead or system admin to request it.
+
+#### 🧩 Getting Your Rapidbotz Agent Secret Code
+
+After the script runs, the agent will launch and prompt you with:
+```
+Please enter secret code:
+```
+
+Follow these steps to get your code:
+
+1. Log in to: https://botzautomation.rapidbotz.com/login
+
+2. Go to:
+    Settings > Automation Tab > BotzAgent
+
+3. Select "Local" 
+
+4. On your local agent row, click the plug icon 🔌 (Connect to Agent)
+
+5. Copy the secret code that appears — it should look like this:
+```
+   BZ::firstname.lastnameinitial::4kqr3mcvqrc4oxehpb7gbnlv7l
+```
+
+6. Paste that code into the terminal when prompted by the agent
+
+✅ After entering the secret, the agent will register with Rapidbotz and be ready for automation tasks.
+
 ---
 
 ### 2. 🔐 Set Up Your GitHub Credentials
