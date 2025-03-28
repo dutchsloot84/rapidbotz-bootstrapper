@@ -126,6 +126,7 @@ This approach is useful if:
 - You're sharing this with users who will run it from a flash drive or temporary folder
 
 ---
+
 ### 3. 🔑 Set Up SSH Key (for GitHub Access)
 You need an SSH key so the script can securely pull from GitHub.
 
@@ -167,6 +168,7 @@ ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIM... your_email@example.com
 ✅ Now your machine is authorized to pull from your GitHub org via SSH.
 
 ---
+
 ### 4. 🛠️ Customize the Config (Optional)
 
 Edit config.json if you want to change the default branch or clone location:
@@ -178,6 +180,7 @@ Edit config.json if you want to change the default branch or clone location:
 ```
 
 ---
+
 ## 🚀 Running the Bootstrapper
 
 Just double-click:
