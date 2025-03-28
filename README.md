@@ -38,33 +38,76 @@ python-installer.exe /quiet InstallAllUsers=1 PrependPath=1 Include_test=0
 ```
 
 ---
+
 ### 2. 🔐 Set Up Your GitHub Credentials
-a. Generate a Personal Access Token (PAT)
 
-Go to GitHub PATs → Generate new token (classic)
-Scopes to enable:
+You need to generate a Personal Access Token (PAT) to allow the script to check for updates in GitHub.
+How to Generate a PAT:
 
-    repo
+1. Go to: https://github.com/settings/tokens
+2. Select “Personal access tokens” > Tokens (classic):
+  - Generate new token (classic)
 
-    read:org
+3. Fill out the form:
+  - Note: Rapidbotz Bootstrapper
+  - Expiration: 90 days or whatever fits your company policy
 
-After generating, authorize the token for your org (SAML SSO).
+4. Under Scopes, check:
+  - ✅ repo (full control of private repositories)
+  - ✅ read:org (to access org metadata)
+5. Click Generate token and copy your token
+💡 Important: Copy the token right away. You won’t see it again!
+6. Select "Enable SSO" dropdown
+  - Select aaa-ncnu-ie and authorize
 
-b. Set Environment Variables (Windows)
-```
+Set Your Environment Variables (Windows)
+
+Open Command Prompt and run:
+```cmd
 setx GITHUB_PAT your_token_here
 setx GITHUB_EMAIL your_email@example.com
 ```
-
+💡 You may need admin rights for this depending on system policy.
 ---
-### 3. 🔑 Set Up SSH Key (if not done already)
+### 3. 🔑 Set Up SSH Key (for GitHub Access)
+You need an SSH key so the script can securely pull from GitHub.
+
+Generate Your SSH Key:
+1. Open Command Prompt and run:
 ```
 ssh-keygen -t ed25519 -C "your_email@example.com"
 ```
-- Add the .pub key to GitHub: SSH Key Settings
+2. When prompted for a location, press Enter to accept the default (this saves it to C:\Users\YourName\.ssh\id_ed25519).
+3. You'll then be prompted for a passphrase:
+```
+Enter passphrase (empty for no passphrase):
+```
+➤ Just press Enter to skip — no password is required for this setup.
 
-- Enable SSO if prompted
-  
+5. You’ll see something like:
+```
+Your identification has been saved in C:\Users\YourName\.ssh\id_ed25519
+Your public key has been saved in C:\Users\YourName\.ssh\id_ed25519.pub
+```
+
+Add Your Key to GitHub:
+
+1. Open the file:
+- Go to: C:\Users\YourName\.ssh\id_ed25519.pub
+- Open it with Notepad or Notepad++
+- It will look like:
+```
+ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIM... your_email@example.com
+```
+2. Go to: https://github.com/settings/keys
+3. Click "New SSH key"
+- Title: something like Rapidbotz Agent
+- Key: paste the entire contents of id_ed25519.pub
+4. Click Add SSH Key
+5. Click Enable SSO if prompted
+
+✅ Now your machine is authorized to pull from your GitHub org via SSH.
+
 ---
 ### 4. 🛠️ Customize the Config (Optional)
 
