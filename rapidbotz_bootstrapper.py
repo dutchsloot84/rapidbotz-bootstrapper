@@ -35,6 +35,7 @@ CLONE_URL = "git@github.com:aaa-ncnu-ie/mobilitas-rapidbotz-local-agent.git"
 # === ENV VARS ===
 GITHUB_TOKEN = os.getenv("GITHUB_PAT")
 GITHUB_EMAIL = os.getenv("GITHUB_EMAIL")
+RAPIDBOTZ_SECRET = os.getenv("RAPIDBOTZ_SECRET")
 
 if not GITHUB_TOKEN or not GITHUB_EMAIL:
     print("ERROR: Missing required environment variables GITHUB_PAT and/or GITHUB_EMAIL.")
@@ -109,11 +110,25 @@ print("Launching Rapidbotz agent...")
 agent_jar = Path(LOCAL_REPO_DIR) / "agent" / "botzautomation-agent-mobilitas-all-1.0.1.jar"
 
 if agent_jar.exists():
-    try:
-        subprocess.Popen(["java", "-jar", str(agent_jar)], shell=True)
-        print("Agent JAR launched successfully.")
-    except Exception as e:
-        print("Failed to launch agent JAR:", e)
+    if RAPIDBOTZ_SECRET:
+        print("Using RAPIDBOTZ_SECRET environment variable to launch agent...")
+        try:
+            process = subprocess.Popen(
+                ["java", "-jar", str(agent_jar)],
+                stdin=subprocess.PIPE,
+                text=True
+            )
+            process.communicate(RAPIDBOTZ_SECRET + "\n")
+            print("Agent launched with provided secret.")
+        except Exception as e:
+            print("Failed to launch agent with secret:", e)
+    else:
+        print("No RAPIDBOTZ_SECRET provided. Launching agent and prompting for input.")
+        try:
+            subprocess.Popen(["java", "-jar", str(agent_jar)], shell=True)
+        except Exception as e:
+            print("Failed to launch agent:", e)
 else:
     print(f"ERROR: agent.jar not found at expected location: {agent_jar}")
+
 

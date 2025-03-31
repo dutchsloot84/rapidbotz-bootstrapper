@@ -18,6 +18,7 @@ IF %ERRORLEVEL% NEQ 0 (
 :: Uncomment the lines below to predefine access keys (optional for advanced users)
 :: set GITHUB_PAT=your_token_here
 :: set GITHUB_EMAIL=your_email@example.com
+:: set RAPIDBOTZ_SECRET=BZ::firstname.lastname::xxxxxxxxxxxxxxxxxxxxxxxxxxxx
 
 :: ==== Run the script ====
 echo Running bootstrapper script...
