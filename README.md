@@ -70,7 +70,28 @@ Follow these steps to get your code:
    BZ::firstname.lastnameinitial::4kqr3mcvqrc4oxehpb7gbnlv7l
 ```
 
-6. Paste that code into the terminal when prompted by the agent
+6. Paste that code into the terminal when prompted by the agent OR alternatively follow the steps below.
+
+
+#### 🔐 Rapidbotz Agent Secret Code (Auto Mode)
+
+To streamline the process and avoid manually entering the agent secret, you can set it as an environment variable:
+
+1. Set RAPIDBOTZ_SECRET environment variable (system-wide)
+
+```
+setx RAPIDBOTZ_SECRET "BZ::firstname.lastname::xxxxxxxxxxxxxxxxxxxx"
+```
+
+2. Or define it directly inside the .bat file
+
+Open run_bootstrapper.bat and uncomment the following line:
+
+```
+:: set RAPIDBOTZ_SECRET=BZ::firstname.lastname::xxxxxxxxxxxxxxxxxxxx
+```
+
+If this variable is present, the script will automatically pass it to the agent during launch.
 
 ✅ After entering the secret, the agent will register with Rapidbotz and be ready for automation tasks.
 
