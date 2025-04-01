@@ -7,6 +7,14 @@ echo   Rapidbotz Bootstrapper Launcher
 echo   Version 1.0
 echo --------------------------------------------
 
+:: ==== Optionally set env vars ====
+:: Uncomment and fill these out if you're running in a restricted environment (e.g., VDI)
+:: These override system environment variables for this session only
+
+:: set GITHUB_PAT=your_github_pat_here
+:: set GITHUB_EMAIL=your_email@yourdomain.com
+:: set RAPIDBOTZ_SECRET=BZ::firstname.lastname::xxxxxxxxxxxxxxxxxxxx
+
 :: ==== Check for Python ====
 echo Checking for Python...
 where python >nul 2>&1
@@ -34,9 +42,10 @@ IF %ERRORLEVEL% NEQ 0 (
     exit /b 1
 )
 
-:: ==== Install keyring if not present ====
-echo Ensuring keyring library is installed...
-python -m pip install keyring --quiet
+:: ==== Install Python dependencies from requirements.txt ====
+echo Installing required Python packages...
+python -m pip install --upgrade pip
+python -m pip install -r requirements.txt
 IF %ERRORLEVEL% NEQ 0 (
     echo WARNING: Could not install keyring automatically. You may need to run 'pip install keyring' manually.
 )
