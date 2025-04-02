@@ -1,224 +1,72 @@
-# Rapidbotz Bootstrapper
-
-A lightweight Python-based tool that pulls the latest version of the `mobilitas-rapidbotz-local-agent` repository and launches the Rapidbotz agent automatically.
-
-Designed to help non-technical users run the Rapidbotz agent with a simple double-click, while ensuring the agent is always up to date.
-
----
-
-## 🔧 Features
-
-- ✅ Pulls from the `main` branch of the GitHub repo
-- ✅ Skips re-downloading if no new updates are found
-- ✅ Automatically launches the Rapidbotz agent (`agent.jar`)
-- ✅ Configurable download location and branch via `config.json`
-- ✅ Includes a `.bat` file for easy execution on Windows
-
----
-
-## 📁 Folder Structure
-
-```md
-/rapidbotz-bootstrapper
-├── config.json                 # Settings for branch and repo path
-├── rapidbotz_bootstrapper.py  # Main Python script (clone + launch)
-├── run_bootstrapper.bat       # Windows batch file for launching the script
-```
-
----
-
-## ⚙️ Setup Instructions
-
-### 1. ✅ Install Python (if needed)
-
-- Recommended: Python 3.10+
-- [Download Python](https://www.python.org/downloads/) or install via command line:
-
-```cmd
-curl -o python-installer.exe https://www.python.org/ftp/python/3.12.2/python-3.12.2-amd64.exe
-python-installer.exe /quiet InstallAllUsers=1 PrependPath=1 Include_test=0
-```
-
-#### 🔐 Prerequisite: Rapidbotz Access
-
-Before you can use the Rapidbotz Bootstrapper, you must have access to the Rapidbotz platform.
-1. Log in to:
-https://botzautomation.rapidbotz.com/login
-
-2. If you don’t have access, contact your team lead or system admin to request it.
-
-#### 🧩 Getting Your Rapidbotz Agent Secret Code
-
-After the script runs, the agent will launch and prompt you with:
-```
-Please enter secret code:
-```
-
-Follow these steps to get your code:
-
-1. Log in to: https://botzautomation.rapidbotz.com/login
-
-2. Go to:
-    Settings > Automation Tab > BotzAgent
-
-3. Select "Local" 
-
-4. On your local agent row, click the plug icon 🔌 (Connect to Agent)
-
-5. Copy the secret code that appears — it should look like this:
-```
-   BZ::firstname.lastnameinitial::4kqr3mcvqrc4oxehpb7gbnlv7l
-```
-
-6. Paste that code into the terminal when prompted by the agent OR alternatively follow the steps below.
-
-
-#### 🔐 Rapidbotz Agent Secret Code (Auto Mode)
-
-To streamline the process and avoid manually entering the agent secret, you can set it as an environment variable:
-
-1. Set RAPIDBOTZ_SECRET environment variable (system-wide)
-
-```
-setx RAPIDBOTZ_SECRET "BZ::firstname.lastname::xxxxxxxxxxxxxxxxxxxx"
-```
-
-2. Or define it directly inside the .bat file
-
-Open run_bootstrapper.bat and uncomment the following line:
-
-```
-:: set RAPIDBOTZ_SECRET=BZ::firstname.lastname::xxxxxxxxxxxxxxxxxxxx
-```
-
-If this variable is present, the script will automatically pass it to the agent during launch.
-
-✅ After entering the secret, the agent will register with Rapidbotz and be ready for automation tasks.
-
----
-
-### 2. 🔐 Set Up Your GitHub Credentials
-
-You need to generate a Personal Access Token (PAT) to allow the script to check for updates in GitHub.
-How to Generate a PAT:
-
-1. Go to: https://github.com/settings/tokens
-2. Select “Personal access tokens” > Tokens (classic):
-  - Generate new token (classic)
-
-3. Fill out the form:
-  - Note: Rapidbotz Bootstrapper
-  - Expiration: 90 days or whatever fits your company policy
-
-4. Under Scopes, check:
-  - ✅ repo (full control of private repositories)
-  - ✅ read:org (to access org metadata)
-5. Click Generate token and copy your token
-💡 Important: Copy the token right away. You won’t see it again!
-6. Select "Enable SSO" dropdown
-  - Select aaa-ncnu-ie and authorize
-
-#### Option A: Set Your Environment Variables (Windows)
-
-Open Command Prompt and run:
-```cmd
-setx GITHUB_PAT your_token_here
-setx GITHUB_EMAIL your_email@example.com
-```
-💡 You may need admin rights for this depending on system policy.
-
-#### Option B: Define Variables Inside the .bat File
-
-If you'd rather not set system-wide environment variables, you can define them directly inside run_bootstrapper.bat.
-
-Open the batch file and uncomment the lines below:
-
-```
-:: set GITHUB_PAT=your_token_here
-:: set GITHUB_EMAIL=your_email@example.com
-```
-
-Just remove the :: at the beginning of each line and add your actual token and email.
-
-This approach is useful if:
-
-- You want to avoid permanent changes
-
-- You're sharing this with users who will run it from a flash drive or temporary folder
-
----
-
-### 3. 🔑 Set Up SSH Key (for GitHub Access)
-You need an SSH key so the script can securely pull from GitHub.
-
-Generate Your SSH Key:
-1. Open Command Prompt and run:
-```
-ssh-keygen -t ed25519 -C "your_email@example.com"
-```
-2. When prompted for a location, press Enter to accept the default (this saves it to C:\Users\YourName\.ssh\id_ed25519).
-3. You'll then be prompted for a passphrase:
-```
-Enter passphrase (empty for no passphrase):
-```
-➤ Just press Enter to skip — no password is required for this setup.
-
-5. You’ll see something like:
-```
-Your identification has been saved in C:\Users\YourName\.ssh\id_ed25519
-Your public key has been saved in C:\Users\YourName\.ssh\id_ed25519.pub
-```
-
-Add Your Key to GitHub:
-
-1. Open the file:
-- Go to: C:\Users\YourName\.ssh\id_ed25519.pub
-- Open it with Notepad or Notepad++
-- It will look like:
-```
-ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIM... your_email@example.com
-```
-2. Go to: https://github.com/settings/keys
-3. Click "New SSH key"
-- Title: something like Rapidbotz Agent
-- Key: paste the entire contents of id_ed25519.pub
-4. Click Add SSH Key
-5. Select "Enable SSO" dropdown
-  - Select aaa-ncnu-ie and authorize
-
-✅ Now your machine is authorized to pull from your GitHub org via SSH.
-
----
-
-### 4. 🛠️ Customize the Config (Optional)
-
-Edit config.json if you want to change the default branch or clone location:
-```json
-{
-  "repo_branch": "main",
-  "local_repo_path": "C:/Rapidbotz/mobilitas-rapidbotz-local-agent"
-}
-```
-
----
-
-## 🚀 Running the Bootstrapper
-
-Just double-click:
-```cmd
-run_bootstrapper.bat
-```
-This will:
-
-1. Check for updates to the Rapidbotz agent repo
-2. Pull latest changes (if any)
-3. Launch the agent (agent.jar)
-   
----
-
-💡 Notes
-
-- The script uses SSH for Git operations and HTTPS (with token) for update detection via GitHub API.
-- Your SSH key and PAT must be authorized for your organization.
-- Make sure Java is installed and available in your system PATH.
-
+Rapidbotz Bootstrapper Launcher
+Version 1.0 - For QA Team
+Updated: March 31, 2025
+
+Overview
+--------
+This tool sets up and runs the Rapidbotz agent on your Windows machine. It handles everything automatically—installing dependencies, cloning the Rapidbotz repository, and launching the agent. The first time you run it, you’ll need to authorize a security key in GitHub, but after that, it’s smooth sailing!
+
+Requirements
+------------
+Before running, ensure you have:
+1. Python (3.9 or later) - Download from python.org (check "Add Python to PATH" during install).
+2. Git - Download from git-scm.com.
+3. Java (JDK or JRE) - Download from java.com.
+4. Your GitHub Personal Access Token (PAT), GitHub Email, and Rapidbotz Secret - Contact IT if you don’t have these.
+
+Installation
+------------
+1. Unzip the Rapidbotz Bootstrapper package to a folder (e.g., C:\Rapidbotz).
+2. Double-click `bootstrapper.bat` to start.
+
+First-Time Setup
+----------------
+The first time you run `bootstrapper.bat`, it will:
+1. Check for Python, Git, and Java (install them if missing—see Requirements).
+2. Ask for your credentials:
+   - GitHub PAT (needs 'repo' and 'write:public_key' scopes).
+   - GitHub Email.
+   - Rapidbotz Secret.
+   Enter each when prompted (your input won’t show for security).
+3. Generate and add an SSH key to GitHub, then pause with:
+
+SSH key added to GitHub successfully!
+ACTION REQUIRED: Authorize the SSH key for SSO in GitHub:
+
+1. Go to: Settings > SSH and GPG keys (https://github.com/settings/keys)
+2. Find the key titled 'Rapidbotz-YYYYMMDD-HHMMSS'
+3. Click 'Configure SSO' and authorize it for 'aaa-ncnu-ie' via your SSO provider.
+4. Once authorized, press Enter to continue...
+
+- Open the link in a browser.
+- Log in to GitHub, find the key, click "Configure SSO," and follow your SSO login (e.g., Okta).
+- After authorizing, return to the script and press Enter.
+4. Clone the Rapidbotz repository and launch the agent.
+
+Running the Agent
+-----------------
+After the first setup:
+- Double-click `bootstrapper.bat` anytime to update the repository and restart the agent.
+- It uses your saved credentials and SSH key—no need to re-enter anything unless IT changes your details.
+
+What It Does
+------------
+- Checks for updates to the Rapidbotz repository.
+- Kills any old agent process to avoid conflicts.
+- Starts the agent in the background (you’ll see logs like `[EL Info]` if it’s working).
+
+Stopping the Agent
+------------------
+- Open Task Manager (Ctrl+Shift+Esc), find `java.exe`, and end it.
+- Or, open a Command Prompt in the script folder, press Ctrl+C, and close the window.
+
+Troubleshooting
+---------------
+- **"Python/Git/Java not found"**: Install the missing tool (see Requirements) and rerun.
+- **"Failed to clone repository"**: 
+   - Check your internet connection.
+   - Ensure the SSH key is authorized (Settings > SSH and GPG keys > Configure SSO).
+   - Contact IT if the error persists.
+- **"Agent file not found"**: The repository might not have cloned correctly—see above.
+- **"Database in use"**: The script should fix this automatically; if not, delete `C:/cfg-mobilitas/BotzAgent/db/BotzAgent.lock.db` and retry.
+- **Still stuck?**: Take a screenshot of the error and email IT.
