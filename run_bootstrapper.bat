@@ -1,10 +1,10 @@
 @echo off
-setlocal
+setlocal EnableDelayedExpansion
 
 :: ==== Friendly Header ====
 echo --------------------------------------------
 echo   Rapidbotz Bootstrapper Launcher
-echo   Version 1.0
+echo   Version 1.0 (Embedded Python Mode)
 echo --------------------------------------------
 
 :: ==== Optionally set env vars ====
@@ -15,13 +15,30 @@ echo --------------------------------------------
 :: set GITHUB_EMAIL=your_email@yourdomain.com
 :: set RAPIDBOTZ_SECRET=BZ::firstname.lastname::xxxxxxxxxxxxxxxxxxxx
 
-:: ==== Check for Python ====
-echo Checking for Python...
-where python >nul 2>&1
-IF %ERRORLEVEL% NEQ 0 (
-    echo ERROR: Python not found! Install from python.org and add to PATH.
+:: ==== Extract Embedded Python ====
+IF NOT EXIST python\python.exe (
+    echo Extracting embedded Python...
+    mkdir python >nul 2>&1
+    tar -xf python-3.13.2-embed-amd64.zip -C python
+)
+
+:: ==== Verify python.exe is available ====
+IF NOT EXIST python\python.exe (
+    echo ERROR: python.exe not found after extraction. Something went wrong.
     pause
     exit /b 1
+)
+
+:: ==== Install pip (if needed) ====
+IF NOT EXIST python\Scripts\pip.exe (
+    echo Installing pip into embedded Python...
+    if EXIST get-pip.py (
+        python\python.exe get-pip.py
+    ) else (
+        echo ERROR: get-pip.py is missing! Please include it in this folder.
+        pause
+        exit /b 1
+    )
 )
 
 :: ==== Check for Git ====
@@ -42,18 +59,18 @@ IF %ERRORLEVEL% NEQ 0 (
     exit /b 1
 )
 
-:: ==== Install Python dependencies from requirements.txt ====
+:: ==== Install Python dependencies ====
 echo Installing required Python packages...
-python -m pip install --upgrade pip
-python -m pip install -r requirements.txt
+python\python.exe -m pip install --upgrade pip --no-warn-script-location >> pip_install.log 2>&1
+python\python.exe -m pip install -r requirements.txt --no-warn-script-location >> pip_install.log 2>&1
 IF %ERRORLEVEL% NEQ 0 (
-    echo WARNING: Could not install keyring automatically. You may need to run 'pip install keyring' manually.
+    echo WARNING: Could not install packages automatically. You may need to check requirements.txt manually.
 )
 
 :: ==== Run the Script ====
 echo.
 echo Starting Rapidbotz setup...
-python rapidbotz_bootstrapper.py
+python\python.exe rapidbotz_bootstrapper.py
 
 :: ==== Finish ====
 echo.
