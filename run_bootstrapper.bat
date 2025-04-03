@@ -22,6 +22,13 @@ IF NOT EXIST python\python.exe (
     tar -xf python-3.13.2-embed-amd64.zip -C python
 )
 
+:: ==== FIX *.pth to enable pip packages ====
+echo Enabling site-packages in embedded Python config...
+for %%f in (python\python*.pth) do (
+    powershell -Command "(Get-Content %%f) -replace '#import site', 'import site' | Set-Content %%f"
+)
+
+
 :: ==== Install pip (if needed) ====
 IF NOT EXIST python\Scripts\pip.exe (
     echo Installing pip into embedded Python...
