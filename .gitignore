@@ -1,0 +1,38 @@
+# === Python Cache ===
+__pycache__/
+*.py[cod]
+*.pyo
+*.pyd
+
+# === Virtual Environments ===
+.env
+.venv/
+env/
+venv/
+
+# === pip & packaging ===
+*.egg-info/
+dist/
+build/
+
+# === OS-specific ===
+.DS_Store
+Thumbs.db
+.Trashes
+
+# === Editor/IDE ===
+.vscode/
+.idea/
+
+# === Logs and dumps ===
+*.log
+
+# === Jupyter/IPython ===
+.ipynb_checkpoints/
+
+# === Git conflict/merge artifacts ===
+*.orig
+
+# === Deployment or export artifacts ===
+*_deployment_notes.*
+*_stories_with_deployment_notes.*
