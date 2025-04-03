@@ -1,5 +1,5 @@
 @echo off
-setlocal
+setlocal EnableDelayedExpansion
 
 :: ==== Friendly Header ====
 echo --------------------------------------------
@@ -15,19 +15,19 @@ echo --------------------------------------------
 :: set GITHUB_EMAIL=your_email@yourdomain.com
 :: set RAPIDBOTZ_SECRET=BZ::firstname.lastname::xxxxxxxxxxxxxxxxxxxx
 
-:: ==== Extract Embedded Python (if needed) ====
+:: ==== Extract Embedded Python ====
 IF NOT EXIST python\python.exe (
     echo Extracting embedded Python...
     mkdir python >nul 2>&1
     tar -xf python-3.13.2-embed-amd64.zip -C python
 )
 
-:: ==== FIX *.pth to enable pip packages ====
-echo Enabling site-packages in embedded Python config...
-for %%f in (python\python*.pth) do (
-    powershell -Command "(Get-Content %%f) -replace '#import site', 'import site' | Set-Content %%f"
+:: ==== Verify python.exe is available ====
+IF NOT EXIST python\python.exe (
+    echo ERROR: python.exe not found after extraction. Something went wrong.
+    pause
+    exit /b 1
 )
-
 
 :: ==== Install pip (if needed) ====
 IF NOT EXIST python\Scripts\pip.exe (
@@ -35,7 +35,7 @@ IF NOT EXIST python\Scripts\pip.exe (
     if EXIST get-pip.py (
         python\python.exe get-pip.py
     ) else (
-        echo ERROR: get-pip.py is missing! Please make sure it's in this folder.
+        echo ERROR: get-pip.py is missing! Please include it in this folder.
         pause
         exit /b 1
     )
@@ -61,8 +61,8 @@ IF %ERRORLEVEL% NEQ 0 (
 
 :: ==== Install Python dependencies ====
 echo Installing required Python packages...
-python\python.exe -m pip install --upgrade pip
-python\python.exe -m pip install -r requirements.txt
+python\python.exe -m pip install --upgrade pip --no-warn-script-location >> pip_install.log 2>&1
+python\python.exe -m pip install -r requirements.txt --no-warn-script-location >> pip_install.log 2>&1
 IF %ERRORLEVEL% NEQ 0 (
     echo WARNING: Could not install packages automatically. You may need to check requirements.txt manually.
 )
