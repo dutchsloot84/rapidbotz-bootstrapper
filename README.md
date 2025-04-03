@@ -1,23 +1,38 @@
-Rapidbotz Bootstrapper Launcher
-Version 1.0 - For QA Team
-Updated: March 31, 2025
+Rapidbotz Bootstrapper Launcher  
+Version 1.0 - For QA Team  
+Updated: April 3, 2025
+
 
 Overview
 --------
-This tool sets up and runs the Rapidbotz agent on your Windows machine. It handles everything automatically—installing dependencies, cloning the Rapidbotz repository, and launching the agent. The first time you run it, you’ll need to authorize a security key in GitHub, but after that, it’s smooth sailing!
+This tool automatically sets up and runs the Rapidbotz agent on your Windows machine.
+It uses a self-contained Python environment, so you don’t need to install Python or worry about system settings.
+It installs dependencies, updates the local agent repo, and launches the agent with one click.
 
 Requirements
 ------------
 Before running, ensure you have:
-1. Python (3.9 or later) - Download from python.org (check "Add Python to PATH" during install).
-2. Git - Download from git-scm.com.
-3. Java (JDK or JRE) - Download from java.com.
-4. Your GitHub Personal Access Token (PAT), GitHub Email, and Rapidbotz Secret - Contact IT if you don’t have these.
+1. **Git** – [Download from git-scm.com](https://git-scm.com)
+2. **Java (JDK or JRE)** – [Download from java.com](https://www.java.com)
+
+You do *not* need to install Python — it comes bundled and self-extracts.
+
+Also have these credentials ready:
+- ✅ Your GitHub Personal Access Token (PAT)
+- ✅ Your GitHub Email
+- ✅ Your Rapidbotz Secret (found in Rapidbotz under: Settings > Automation > Connect to Agent)
 
 Installation
 ------------
-1. Unzip the Rapidbotz Bootstrapper package to a folder (e.g., C:\Rapidbotz).
-2. Double-click `bootstrapper.bat` to start.
+1. Unzip the `rapidbotz-bootstrapper` package to a local folder (e.g., `C:\Rapidbotz`).
+2. Double-click `run_bootstrapper.bat`.
+
+The first time you run it, it will:
+- Extract embedded Python
+- Install pip (automatically)
+- Install required dependencies (`requests`, `keyring`, etc.)
+- Clone the Rapidbotz agent repo
+- Launch the RapidBotz agent and uses your stored secret code
 
 First-Time Setup
 ----------------
