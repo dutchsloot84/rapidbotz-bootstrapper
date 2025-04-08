@@ -1,5 +1,5 @@
 @echo off
-setlocal EnableDelayedExpansion
+setlocal
 
 :: ==== Friendly Header ====
 echo --------------------------------------------
@@ -8,9 +8,7 @@ echo   Version 1.0 (Embedded Python Mode)
 echo --------------------------------------------
 
 :: ==== Optionally set env vars ====
-:: Uncomment and fill these out if you're running in a restricted environment (e.g., VDI)
-:: These override system environment variables for this session only
-
+:: Uncomment these if you're running in a restricted environment
 :: set GITHUB_PAT=your_github_pat_here
 :: set GITHUB_EMAIL=your_email@yourdomain.com
 :: set RAPIDBOTZ_SECRET=BZ::firstname.lastname::xxxxxxxxxxxxxxxxxxxx
@@ -19,23 +17,22 @@ echo --------------------------------------------
 IF NOT EXIST python\python.exe (
     echo Extracting embedded Python...
     mkdir python >nul 2>&1
-    tar -xf python-3.13.2-embed-amd64.zip -C python
+    powershell -NoProfile -Command "Expand-Archive -Path 'python-3.13.2-embed-amd64.zip' -DestinationPath 'python' -Force"
 )
 
-:: ==== Verify python.exe is available ====
 IF NOT EXIST python\python.exe (
     echo ERROR: python.exe not found after extraction. Something went wrong.
     pause
     exit /b 1
 )
 
-:: ==== Install pip (if needed) ====
+:: ==== Install pip if needed ====
 IF NOT EXIST python\Scripts\pip.exe (
-    echo Installing pip into embedded Python...
+    echo Installing pip...
     if EXIST get-pip.py (
         python\python.exe get-pip.py
     ) else (
-        echo ERROR: get-pip.py is missing! Please include it in this folder.
+        echo ERROR: get-pip.py is missing!
         pause
         exit /b 1
     )
@@ -61,11 +58,8 @@ IF %ERRORLEVEL% NEQ 0 (
 
 :: ==== Install Python dependencies ====
 echo Installing required Python packages...
-python\python.exe -m pip install --upgrade pip --no-warn-script-location >> pip_install.log 2>&1
-python\python.exe -m pip install -r requirements.txt --no-warn-script-location >> pip_install.log 2>&1
-IF %ERRORLEVEL% NEQ 0 (
-    echo WARNING: Could not install packages automatically. You may need to check requirements.txt manually.
-)
+python\python.exe -m pip install --upgrade pip --no-warn-script-location
+python\python.exe -m pip install -r requirements.txt --no-warn-script-location
 
 :: ==== Run the Script ====
 echo.
@@ -74,6 +68,5 @@ python\python.exe rapidbotz_bootstrapper.py
 
 :: ==== Finish ====
 echo.
-echo Setup complete! Check above for any errors.
-echo Press any key to exit.
+echo Setup complete! Press any key to exit.
 pause
