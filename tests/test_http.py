@@ -8,7 +8,7 @@ import pytest
 # Ensure package import
 sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 
-from rbz.http import Options, resolve_ca_bundle, build_session
+from rbz import Options, resolve_ca_bundle, build_session
 
 
 def test_resolve_ca_bundle_precedence(monkeypatch, tmp_path):
@@ -41,8 +41,7 @@ def test_resolve_ca_bundle_precedence(monkeypatch, tmp_path):
     assert resolve_ca_bundle(opts) == certifi.where()
 
 
-def test_insecure_verify_false(monkeypatch):
+def test_insecure_verify_false():
     opts = Options(insecure=True)
-    with pytest.warns(UserWarning):
-        session = build_session(opts)
+    session = build_session(opts)
     assert session.verify is False

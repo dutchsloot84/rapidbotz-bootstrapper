@@ -54,6 +54,7 @@ if errorlevel 1 (
 
 :: run bootstrapper
 echo Running bootstrapper...
+set "PYTHONPATH=%CD%;%PYTHONPATH%"
 "%PY_EXE%" rapidbotz_bootstrapper.py >>"%LOGFILE%" 2>&1
 if errorlevel 1 (
   echo Bootstrapper failed. See log: %LOGFILE%
