@@ -8,15 +8,18 @@ set "LOGFILE=bootstrapper-%TIMESTAMP%.log"
 echo Logging to %LOGFILE%
 > "%LOGFILE%" echo Rapidbotz bootstrapper log %TIMESTAMP%
 
-set "PY=python\python.exe"
+set "PY_DIR=python"
+set "PY_EXE=%PY_DIR%\python.exe"
+set "WHEELS_DIR=wheels"
+set "REQS=requirements.txt"
 
 :: extract embedded Python if missing
-if not exist "%PY%" (
+if not exist "%PY_EXE%" (
   echo Extracting embedded Python...
-  mkdir python >nul 2>&1
-  powershell -NoProfile -Command "Expand-Archive -Path 'python-3.13.2-embed-amd64.zip' -DestinationPath 'python' -Force" >>"%LOGFILE%" 2>&1
+  mkdir "%PY_DIR%" >nul 2>&1
+  powershell -NoProfile -Command "Expand-Archive -Path 'python-3.13.2-embed-amd64.zip' -DestinationPath '%PY_DIR%' -Force" >>"%LOGFILE%" 2>&1
   if errorlevel 1 (
-    echo Failed to extract Python. See %LOGFILE%
+    echo Failed to extract Python. See log: %LOGFILE%
     exit /b 1
   )
 )
@@ -27,52 +30,72 @@ set "PYZIP=python313.zip"
   echo %PYZIP%
   echo .
   echo import site
-)>python\python._pth
+)>"%PY_DIR%\python._pth"
 
 :: ensure pip is available
-%PY% -m pip --version >>"%LOGFILE%" 2>&1
+"%PY_EXE%" -m pip --version >>"%LOGFILE%" 2>&1
 if errorlevel 1 (
   call :clean_broken_pip
   echo Installing pip...
-  %PY% get-pip.py >>"%LOGFILE%" 2>&1
+  "%PY_EXE%" get-pip.py >>"%LOGFILE%" 2>&1
   if errorlevel 1 (
-    echo Failed to install pip. See %LOGFILE%
+    echo Failed to install pip. See log: %LOGFILE%
     exit /b 1
   )
 )
 
-:: install dependencies (prefer wheels\*.whl)
+:: install dependencies (prefer local wheels)
 echo Installing dependencies...
-set HAS_WHEELS=
-if exist wheels\*.whl set HAS_WHEELS=1
-if defined HAS_WHEELS (
-  echo Using local wheels >>"%LOGFILE%"
-  %PY% -m pip install --no-index --find-links=wheels wheels\*.whl >>"%LOGFILE%" 2>&1
-) else if exist requirements.txt (
-  echo Using requirements.txt >>"%LOGFILE%"
-  %PY% -m pip install -r requirements.txt >>"%LOGFILE%" 2>&1
-) else (
-  echo No requirements.txt found; skipping dependency install >>"%LOGFILE%"
-)
+call :install_deps_offline_first
 if errorlevel 1 (
-  echo Failed to install dependencies. See %LOGFILE%
+  echo Failed to install dependencies. See log: %LOGFILE%
   exit /b 1
 )
 
 :: run bootstrapper
 echo Running bootstrapper...
-%PY% rapidbotz_bootstrapper.py >>"%LOGFILE%" 2>&1
+"%PY_EXE%" rapidbotz_bootstrapper.py >>"%LOGFILE%" 2>&1
 if errorlevel 1 (
-  echo Bootstrapper failed. See %LOGFILE%
+  echo Bootstrapper failed. See log: %LOGFILE%
   exit /b 1
 )
 
 echo Done. See %LOGFILE% for details.
 exit /b 0
 
-:clean_broken_pip
-for /d %%D in ("python\Lib\site-packages\pip*") do (
-  rmdir /s /q "%%~fD" >>"%LOGFILE%" 2>&1
+:install_deps_offline_first
+setlocal ENABLEDELAYEDEXPANSION
+set "DO_OFFLINE=0"
+if exist "%WHEELS_DIR%" (
+  dir /b "%WHEELS_DIR%\*.whl" >nul 2>&1 && set "DO_OFFLINE=1"
 )
-del /q python\Scripts\pip*.exe >nul 2>&1
+if "!DO_OFFLINE!"=="1" (
+  echo Using local wheels
+  if exist "%REQS%" (
+    "%PY_EXE%" -m pip install --no-index --find-links="%WHEELS_DIR%" -r "%REQS%" --no-warn-script-location >>"%LOGFILE%" 2>&1
+    if errorlevel 1 (endlocal & exit /b 1)
+  ) else (
+    rem Expand the wheel list ourselves (pip does not expand *.whl in .bat)
+    set "PKGS="
+    for %%F in ("%WHEELS_DIR%\*.whl") do (
+    set "PKGS=!PKGS! "%%~fF""
+    )
+    if not defined PKGS (
+      echo ERROR: No .whl files found in "%WHEELS_DIR%".
+      endlocal & exit /b 1
+    )
+    "%PY_EXE%" -m pip install --no-index --find-links="%WHEELS_DIR%" !PKGS! --no-warn-script-location >>"%LOGFILE%" 2>&1
+    if errorlevel 1 (endlocal & exit /b 1)
+  )
+) else if exist "%REQS%" (
+  "%PY_EXE%" -m pip install -r "%REQS%" --no-warn-script-location >>"%LOGFILE%" 2>&1
+  if errorlevel 1 (endlocal & exit /b 1)
+) else (
+  echo No requirements.txt found; skipping dependency install >>"%LOGFILE%"
+)
+endlocal & exit /b 0
+
+:clean_broken_pip
+for /d %%D in ("%PY_DIR%\Lib\site-packages\pip-*.dist-info") do rmdir /s /q "%%~fD" >>"%LOGFILE%" 2>&1
+del /q "%PY_DIR%\Scripts\pip*.exe" >nul 2>&1
 exit /b 0
