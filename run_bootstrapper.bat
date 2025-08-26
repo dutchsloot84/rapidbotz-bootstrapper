@@ -44,13 +44,15 @@ if errorlevel 1 (
 :: install dependencies (prefer wheels\*.whl)
 echo Installing dependencies...
 set HAS_WHEELS=
-for %%F in (wheels\*.whl) do set HAS_WHEELS=1
+if exist wheels\*.whl set HAS_WHEELS=1
 if defined HAS_WHEELS (
   echo Using local wheels >>"%LOGFILE%"
   %PY% -m pip install --no-index --find-links=wheels wheels\*.whl >>"%LOGFILE%" 2>&1
-) else (
+) else if exist requirements.txt (
   echo Using requirements.txt >>"%LOGFILE%"
   %PY% -m pip install -r requirements.txt >>"%LOGFILE%" 2>&1
+) else (
+  echo No requirements.txt found; skipping dependency install >>"%LOGFILE%"
 )
 if errorlevel 1 (
   echo Failed to install dependencies. See %LOGFILE%
