@@ -1,5 +1,7 @@
 @echo off
 setlocal
+set "SCRIPT_DIR=%~dp0"
+cd /d "%SCRIPT_DIR%"
 echo Rapidbotz Bootstrapper
 
 :: timestamped log
@@ -54,7 +56,7 @@ if errorlevel 1 (
 
 :: run bootstrapper
 echo Running bootstrapper...
-set "PYTHONPATH=%CD%;%PYTHONPATH%"
+set "PYTHONPATH=%SCRIPT_DIR%;%PYTHONPATH%"
 "%PY_EXE%" rapidbotz_bootstrapper.py >>"%LOGFILE%" 2>&1
 if errorlevel 1 (
   echo Bootstrapper failed. See log: %LOGFILE%
