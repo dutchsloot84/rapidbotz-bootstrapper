@@ -8,6 +8,12 @@ import requests
 import time
 import keyring
 import getpass
+sys.path.insert(0, os.path.dirname(__file__))  # <-- add this line
+
+from rbz.http import Options, build_session
+
+
+from rbz.http import Options, build_session
 
 from rbz.http import Options, build_session
 
