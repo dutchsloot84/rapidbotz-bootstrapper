@@ -27,6 +27,11 @@ Thumbs.db
 # === Logs and dumps ===
 *.log
 
+# === Local certificates ===
+certs/
+*.pem
+*.crt
+
 # === Jupyter/IPython ===
 .ipynb_checkpoints/
 
