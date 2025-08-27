@@ -30,6 +30,7 @@ if not exist "%PY_EXE%" (
 set "PYZIP=python313.zip"
 (
   echo %PYZIP%
+  echo %SCRIPT_DIR%
   echo .
   echo import site
 )>"%PY_DIR%\python._pth"
