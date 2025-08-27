@@ -4,6 +4,7 @@ from pathlib import Path
 
 import certifi
 import pytest
+import requests
 
 # Ensure package import
 sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
@@ -45,3 +46,23 @@ def test_insecure_verify_false():
     opts = Options(insecure=True)
     session = build_session(opts)
     assert session.verify is False
+
+
+def test_default_timeout(monkeypatch):
+    captured = {}
+
+    def fake_request(self, method, url, **kwargs):
+        captured['timeout'] = kwargs.get('timeout')
+        class Dummy:
+            status_code = 200
+            def close(self):
+                pass
+        return Dummy()
+
+    monkeypatch.setattr(requests.Session, 'request', fake_request, raising=False)
+    opts = Options(timeout=12)
+    session = build_session(opts)
+    session.request('GET', 'http://example.com')
+    assert captured['timeout'] == 12
+    session.request('GET', 'http://example.com', timeout=1)
+    assert captured['timeout'] == 1
