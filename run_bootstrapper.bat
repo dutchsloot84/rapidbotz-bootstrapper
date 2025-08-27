@@ -82,7 +82,7 @@ if "!DO_OFFLINE!"=="1" (
     rem Expand the wheel list ourselves (pip does not expand *.whl in .bat)
     set "PKGS="
     for %%F in ("%WHEELS_DIR%\*.whl") do (
-    set "PKGS=!PKGS! "%%~fF""
+      set "PKGS=!PKGS! \"%%~fF\""
     )
     if not defined PKGS (
       echo ERROR: No .whl files found in "%WHEELS_DIR%".
