@@ -2,11 +2,18 @@ import os
 import subprocess
 import sys
 import json
+import argparse
 from pathlib import Path
 import requests
 import time
 import keyring
 import getpass
+sys.path.insert(0, os.path.dirname(__file__))  # <-- add this line
+
+from rbz.http import Options, build_session
+
+
+from rbz.http import Options, build_session
 
 # === LOAD CONFIG ===
 DEFAULT_CONFIG = {
@@ -39,6 +46,24 @@ SERVICE_NAME = "Rapidbotz"
 SSH_DIR = Path.home() / ".ssh"
 SSH_KEY = SSH_DIR / "id_ed25519"
 
+# === HTTP OPTIONS ===
+def parse_args():
+    parser = argparse.ArgumentParser()
+    parser.add_argument("--ca-bundle", help="Path to a custom CA bundle")
+    parser.add_argument("--proxy", help="Proxy URL for both HTTP and HTTPS")
+    parser.add_argument(
+        "--insecure",
+        action="store_true",
+        help="Disable TLS verification (unsafe; for local testing only)",
+    )
+    return parser.parse_args()
+
+
+args = parse_args()
+_proxies = {"http": args.proxy, "https": args.proxy} if args.proxy else None
+HTTP_OPTIONS = Options(ca_bundle=args.ca_bundle, proxies=_proxies, insecure=args.insecure)
+SESSION = build_session(HTTP_OPTIONS)
+
 # === CREDENTIAL MANAGEMENT ===
 def get_credential(key, prompt):
     credential = keyring.get_password(SERVICE_NAME, key)
@@ -66,7 +91,7 @@ def generate_ssh_key(email):
         return True  # Indicate a new key was generated
     return False  # No new key generated
 
-def add_ssh_key_to_github(token, public_key_path):
+def add_ssh_key_to_github(token, public_key_path, session: requests.Session):
     with open(public_key_path, "r") as f:
         public_key = f.read().strip()
     api_url = "https://api.github.com/user/keys"
@@ -75,7 +100,7 @@ def add_ssh_key_to_github(token, public_key_path):
         "title": f"Rapidbotz-{time.strftime('%Y%m%d-%H%M%S')}",
         "key": public_key
     }
-    response = requests.post(api_url, headers=headers, json=data)
+    response = session.post(api_url, headers=headers, json=data, timeout=HTTP_OPTIONS.timeout)
     if response.status_code == 201:
         print("SSH key added to GitHub successfully!")
         return True  # New key added
@@ -101,18 +126,20 @@ RAPIDBOTZ_SECRET = get_credential("RAPIDBOTZ_SECRET", "Please enter your Rapidbo
 
 # Generate and upload SSH key if needed
 new_key_generated = generate_ssh_key(GITHUB_EMAIL)
-new_key_added = add_ssh_key_to_github(GITHUB_TOKEN, SSH_KEY.with_suffix(".pub"))
+new_key_added = add_ssh_key_to_github(GITHUB_TOKEN, SSH_KEY.with_suffix(".pub"), SESSION)
 if new_key_generated or new_key_added:
     wait_for_sso_authorization()
 
 # === FUNCTIONS ===
-def get_latest_remote_commit():
+def get_latest_remote_commit(session: requests.Session):
     api_url = f"https://api.github.com/repos/{GITHUB_REPO}/commits/{BRANCH}"
     headers = {"Accept": "application/vnd.github+json", "Authorization": f"Bearer {GITHUB_TOKEN}"}
     try:
-        response = requests.get(api_url, headers=headers, timeout=10)
+        response = session.get(api_url, headers=headers, timeout=HTTP_OPTIONS.timeout)
         response.raise_for_status()
         return response.json()["sha"]
+    except requests.exceptions.SSLError:
+        raise
     except requests.RequestException as e:
         print(f"WARNING: Could not check for updates (network error: {e}). Proceeding anyway...")
         return None
@@ -156,7 +183,7 @@ if not repo_path.exists():
         sys.exit(1)
 else:
     print(f"Found existing repository at {LOCAL_REPO_DIR}. Checking for updates...")
-    remote_commit = get_latest_remote_commit()
+    remote_commit = get_latest_remote_commit(SESSION)
     local_commit = get_latest_local_commit(LOCAL_REPO_DIR)
     if remote_commit and local_commit and remote_commit == local_commit:
         print("Repository is already up to date.")

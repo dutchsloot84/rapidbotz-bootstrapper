@@ -1,72 +1,106 @@
 @echo off
 setlocal
+set "SCRIPT_DIR=%~dp0"
+cd /d "%SCRIPT_DIR%"
+echo Rapidbotz Bootstrapper
 
-:: ==== Friendly Header ====
-echo --------------------------------------------
-echo   Rapidbotz Bootstrapper Launcher
-echo   Version 1.0 (Embedded Python Mode)
-echo --------------------------------------------
+:: timestamped log
+for /f %%i in ('powershell -NoProfile -Command "Get-Date -Format yyyyMMdd-HHmmss"') do set TIMESTAMP=%%i
+set "LOGFILE=bootstrapper-%TIMESTAMP%.log"
+echo Logging to %LOGFILE%
+> "%LOGFILE%" echo Rapidbotz bootstrapper log %TIMESTAMP%
 
-:: ==== Optionally set env vars ====
-:: Uncomment these if you're running in a restricted environment
-:: set GITHUB_PAT=your_github_pat_here
-:: set GITHUB_EMAIL=your_email@yourdomain.com
-:: set RAPIDBOTZ_SECRET=BZ::firstname.lastname::xxxxxxxxxxxxxxxxxxxx
+set "PY_DIR=python"
+set "PY_EXE=%PY_DIR%\python.exe"
+set "WHEELS_DIR=wheels"
+set "REQS=requirements.txt"
 
-:: ==== Extract Embedded Python ====
-IF NOT EXIST python\python.exe (
-    echo Extracting embedded Python...
-    mkdir python >nul 2>&1
-    powershell -NoProfile -Command "Expand-Archive -Path 'python-3.13.2-embed-amd64.zip' -DestinationPath 'python' -Force"
-)
-
-IF NOT EXIST python\python.exe (
-    echo ERROR: python.exe not found after extraction. Something went wrong.
-    pause
+:: extract embedded Python if missing
+if not exist "%PY_EXE%" (
+  echo Extracting embedded Python...
+  mkdir "%PY_DIR%" >nul 2>&1
+  powershell -NoProfile -Command "Expand-Archive -Path 'python-3.13.2-embed-amd64.zip' -DestinationPath '%PY_DIR%' -Force" >>"%LOGFILE%" 2>&1
+  if errorlevel 1 (
+    echo Failed to extract Python. See log: %LOGFILE%
     exit /b 1
+  )
 )
 
-:: ==== Install pip if needed ====
-IF NOT EXIST python\Scripts\pip.exe (
-    echo Installing pip...
-    if EXIST get-pip.py (
-        python\python.exe get-pip.py
-    ) else (
-        echo ERROR: get-pip.py is missing!
-        pause
-        exit /b 1
+:: ensure python._pth enables site and stdlib zip
+set "PYZIP=python313.zip"
+(
+  echo %PYZIP%
+  echo %SCRIPT_DIR%
+  echo .
+  echo import site
+)>"%PY_DIR%\python._pth"
+
+:: ensure pip is available
+"%PY_EXE%" -m pip --version >>"%LOGFILE%" 2>&1
+if errorlevel 1 (
+  call :clean_broken_pip
+  echo Installing pip...
+  "%PY_EXE%" get-pip.py >>"%LOGFILE%" 2>&1
+  if errorlevel 1 (
+    echo Failed to install pip. See log: %LOGFILE%
+    exit /b 1
+  )
+)
+
+:: install dependencies (prefer local wheels)
+echo Installing dependencies...
+call :install_deps_offline_first
+if errorlevel 1 (
+  echo Failed to install dependencies. See log: %LOGFILE%
+  exit /b 1
+)
+
+:: run bootstrapper
+echo - Running setup...
+set "PYTHONPATH=%SCRIPT_DIR%;%PYTHONPATH%"
+powershell -NoProfile -ExecutionPolicy Bypass -Command ^
+  "$ErrorActionPreference='Continue'; & '%PY_EXE%' 'rapidbotz_bootstrapper.py' 2>&1 | Tee-Object -FilePath '%LOGFILE%' -Append; exit $LASTEXITCODE"
+if errorlevel 1 (
+  echo ERROR: Setup failed. See %LOGFILE%
+  exit /b 1
+)
+
+echo Success.
+exit /b 0
+
+:install_deps_offline_first
+setlocal ENABLEDELAYEDEXPANSION
+set "DO_OFFLINE=0"
+if exist "%WHEELS_DIR%" (
+  dir /b "%WHEELS_DIR%\*.whl" >nul 2>&1 && set "DO_OFFLINE=1"
+)
+if "!DO_OFFLINE!"=="1" (
+  echo Using local wheels
+  if exist "%REQS%" (
+    "%PY_EXE%" -m pip install --no-index --find-links="%WHEELS_DIR%" -r "%REQS%" --no-warn-script-location >>"%LOGFILE%" 2>&1
+    if errorlevel 1 (endlocal & exit /b 1)
+  ) else (
+    rem Expand the wheel list ourselves (pip does not expand *.whl in .bat)
+    set "PKGS="
+    for %%F in ("%WHEELS_DIR%\*.whl") do (
+      set "PKGS=!PKGS! \"%%~fF\""
     )
+    if not defined PKGS (
+      echo ERROR: No .whl files found in "%WHEELS_DIR%".
+      endlocal & exit /b 1
+    )
+    "%PY_EXE%" -m pip install --no-index --find-links="%WHEELS_DIR%" !PKGS! --no-warn-script-location >>"%LOGFILE%" 2>&1
+    if errorlevel 1 (endlocal & exit /b 1)
+  )
+) else if exist "%REQS%" (
+  "%PY_EXE%" -m pip install -r "%REQS%" --no-warn-script-location >>"%LOGFILE%" 2>&1
+  if errorlevel 1 (endlocal & exit /b 1)
+) else (
+  echo No requirements.txt found; skipping dependency install >>"%LOGFILE%"
 )
+endlocal & exit /b 0
 
-:: ==== Check for Git ====
-echo Checking for Git...
-where git >nul 2>&1
-IF %ERRORLEVEL% NEQ 0 (
-    echo ERROR: Git not found! Install from git-scm.com.
-    pause
-    exit /b 1
-)
-
-:: ==== Check for Java ====
-echo Checking for Java...
-java -version >nul 2>&1
-IF %ERRORLEVEL% NEQ 0 (
-    echo ERROR: Java not found! Install from java.com.
-    pause
-    exit /b 1
-)
-
-:: ==== Install Python dependencies ====
-echo Installing required Python packages...
-python\python.exe -m pip install --upgrade pip --no-warn-script-location
-python\python.exe -m pip install -r requirements.txt --no-warn-script-location
-
-:: ==== Run the Script ====
-echo.
-echo Starting Rapidbotz setup...
-python\python.exe rapidbotz_bootstrapper.py
-
-:: ==== Finish ====
-echo.
-echo Setup complete! Press any key to exit.
-pause
+:clean_broken_pip
+for /d %%D in ("%PY_DIR%\Lib\site-packages\pip-*.dist-info") do rmdir /s /q "%%~fD" >>"%LOGFILE%" 2>&1
+del /q "%PY_DIR%\Scripts\pip*.exe" >nul 2>&1
+exit /b 0
