@@ -27,6 +27,8 @@ Installation
 1. Unzip the `rapidbotz-bootstrapper` package to a local folder (e.g., `C:\Rapidbotz`).
 2. Double-click `run_bootstrapper.bat`.
 
+The launcher mirrors all output to the console and saves a timestamped log (`bootstrapper-YYYYMMDD-HHMMSS.log`) in the same folder for troubleshooting.
+
 The first time you run it, it will:
 - Extract embedded Python
 - Install pip (automatically)
@@ -36,7 +38,7 @@ The first time you run it, it will:
 
 First-Time Setup
 ----------------
-The first time you run `bootstrapper.bat`, it will:
+The first time you run `run_bootstrapper.bat`, it will:
 1. Check for Python, Git, and Java (install them if missing—see Requirements).
 2. Ask for your credentials:
    - GitHub PAT (needs 'repo' and 'write:public_key' scopes).
@@ -61,7 +63,7 @@ ACTION REQUIRED: Authorize the SSH key for SSO in GitHub:
 Running the Agent
 -----------------
 After the first setup:
-- Double-click `bootstrapper.bat` anytime to update the repository and restart the agent.
+- Double-click `run_bootstrapper.bat` anytime to update the repository and restart the agent.
 - It uses your saved credentials and SSH key—no need to re-enter anything unless IT changes your details.
 
 What It Does

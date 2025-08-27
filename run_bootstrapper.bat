@@ -59,7 +59,7 @@ if errorlevel 1 (
 echo - Running setup...
 set "PYTHONPATH=%SCRIPT_DIR%;%PYTHONPATH%"
 powershell -NoProfile -ExecutionPolicy Bypass -Command ^
-  "$ErrorActionPreference='Continue'; & '%PY_EXE%' 'rapidbotz_bootstrapper.py' 2>&1 | Tee-Object -FilePath '%LOGFILE%' -Append; exit $LASTEXITCODE"
+  "$ErrorActionPreference='Continue'; cmd /c \"\"%PY_EXE%\" rapidbotz_bootstrapper.py 2^>^&1\" | Tee-Object -FilePath '%LOGFILE%' -Append; exit $LASTEXITCODE"
 if errorlevel 1 (
   echo ERROR: Setup failed. See %LOGFILE%
   exit /b 1
