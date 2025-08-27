@@ -61,5 +61,13 @@ def build_session(options: Options) -> requests.Session:
     session.headers["User-Agent"] = options.user_agent
     if options.extra_headers:
         session.headers.update(options.extra_headers)
+    _orig_request = session.request
+    default_timeout = options.timeout
 
+    def _request_with_timeout(method, url, **kwargs):
+        if "timeout" not in kwargs or kwargs["timeout"] is None:
+            kwargs["timeout"] = default_timeout
+        return _orig_request(method, url, **kwargs)
+
+    session.request = _request_with_timeout
     return session

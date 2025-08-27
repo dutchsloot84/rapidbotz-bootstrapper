@@ -56,15 +56,16 @@ if errorlevel 1 (
 )
 
 :: run bootstrapper
-echo Running bootstrapper...
+echo - Running setup...
 set "PYTHONPATH=%SCRIPT_DIR%;%PYTHONPATH%"
-"%PY_EXE%" rapidbotz_bootstrapper.py >>"%LOGFILE%" 2>&1
+powershell -NoProfile -ExecutionPolicy Bypass -Command ^
+  "$ErrorActionPreference='Continue'; & '%PY_EXE%' 'rapidbotz_bootstrapper.py' 2>&1 | Tee-Object -FilePath '%LOGFILE%' -Append; exit $LASTEXITCODE"
 if errorlevel 1 (
-  echo Bootstrapper failed. See log: %LOGFILE%
+  echo ERROR: Setup failed. See %LOGFILE%
   exit /b 1
 )
 
-echo Done. See %LOGFILE% for details.
+echo Success.
 exit /b 0
 
 :install_deps_offline_first
