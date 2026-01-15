@@ -80,6 +80,18 @@ Stopping the Agent
 Troubleshooting
 ---------------
 
+### Diagnostics mode
+You can run the bootstrapper in a read-only diagnostics mode to capture environment details
+and check whether the agent process is already running:
+
+```cmd
+python rapidbotz_bootstrapper.py --diagnose
+```
+
+This writes:
+- `bootstrapper.log` (combined log output)
+- `bootstrapper-status.json` (last status, timestamp, hostname, version, repo update flag)
+
 ### Corporate TLS / Netskope: trusting the inspected chain
 If your corporate network performs TLS inspection (e.g., Netskope), Python’s default CA bundle (from `certifi`) will not trust
 the injected corporate root. You have three secure ways to supply the correct CA to the tool:
