@@ -1,4 +1,10 @@
 {
   "repo_branch": "main",
-  "local_repo_path": "C:/Rapidbotz/mobilitas-rapidbotz-local-agent"
+  "local_repo_path": "C:/Rapidbotz/mobilitas-rapidbotz-local-agent",
+  "circuit_breaker_enabled": true,
+  "circuit_breaker_window_minutes": 15,
+  "circuit_breaker_failure_threshold": 5,
+  "log_max_bytes": 5000000,
+  "log_backup_count": 5,
+  "log_dir": "%ProgramData%/RapidBotz/logs"
 }

@@ -80,6 +80,60 @@ Stopping the Agent
 Troubleshooting
 ---------------
 
+### QA Triage
+Run these commands based on what you need:
+
+- **Normal run**: double-click `run_bootstrapper.bat`
+- **Diagnostics (no changes)**:
+  ```cmd
+  python rapidbotz_bootstrapper.py --diagnose
+  ```
+- **Reset circuit breaker**:
+  ```cmd
+  python rapidbotz_bootstrapper.py --reset-circuit-breaker
+  ```
+  Or delete `bootstrapper-status.json` to clear the circuit breaker state.
+- **Force restart**:
+  ```cmd
+  python rapidbotz_bootstrapper.py --force-restart
+  ```
+- **Create support bundle**:
+  ```cmd
+  python rapidbotz_bootstrapper.py --bundle-logs
+  ```
+
+**Where to find logs/status**
+- Default log directory: `%ProgramData%\RapidBotz\logs\`
+- Fallback if not writable: `<bootstrapper folder>\logs\`
+- Files:
+  - `bootstrapper.log` (rolling log, includes run_id on every line)
+  - `bootstrapper-status.json` (latest status + summary; stored in the bootstrapper folder)
+  - `bootstrapper-support-bundle-<hostname>-<run_id>.zip` (if `--bundle-logs` used)
+
+**What QA should send back**
+- Preferred: the support bundle zip.
+- Or: `bootstrapper.log` + `bootstrapper-status.json` + the most recent `bootstrapper-YYYYMMDD-HHMMSS.log` from the launcher.
+
+**If the machine/agent restarts**
+- Approximate timestamp of the restart
+- Whether a scheduled task or service is invoking the bootstrapper (if known)
+- Optional: relevant Windows Event Viewer entries
+
+**Rollback/disable guardrails**
+- Set `"circuit_breaker_enabled": false` in `config.json` to disable the circuit breaker.
+
+### Diagnostics mode
+You can run the bootstrapper in a read-only diagnostics mode to capture environment details
+and check whether the agent process is already running:
+
+```cmd
+python rapidbotz_bootstrapper.py --diagnose
+```
+
+This writes:
+- `bootstrapper.log` (rolling log output)
+- `bootstrapper-status.json` (last status in the bootstrapper folder)
+
 ### Corporate TLS / Netskope: trusting the inspected chain
 If your corporate network performs TLS inspection (e.g., Netskope), Python’s default CA bundle (from `certifi`) will not trust
 the injected corporate root. You have three secure ways to supply the correct CA to the tool:
